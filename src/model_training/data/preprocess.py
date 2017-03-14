@@ -82,11 +82,10 @@ def process_potsdam():
         return (rgbir_file_name, depth_file_name, output_file_name,
                 output_mask_file_name)
 
-    if False:
-        process_data(
-            dataset_info.all_file_inds, raw_rgbir_input_path,
-            raw_depth_input_path, raw_output_path, raw_output_mask_path,
-            proc_data_path, get_file_names)
+    process_data(
+        dataset_info.all_file_inds, raw_rgbir_input_path,
+        raw_depth_input_path, raw_output_path, raw_output_mask_path,
+        proc_data_path, get_file_names)
 
     means, stds = get_channel_stats(
         proc_data_path, dataset_info.all_file_names)

@@ -14,7 +14,7 @@ from .models.conv_logistic import make_conv_logistic
 from .models.fcn_vgg import make_fcn_vgg
 from .models.fcn_resnet import make_fcn_resnet
 from .models.unet import make_unet
-from .model.densenet_seg import make_densenet_seg
+from .models.densenet_seg import make_densenet_seg
 
 CONV_LOGISTIC = 'conv_logistic'
 FCN_VGG = 'fcn_vgg'
@@ -39,7 +39,8 @@ def make_model(options, dataset_info):
     elif model_type == UNET:
         model = make_unet(input_shape, nb_labels)
     elif model_type == DENSENET_SEG:
-        model = make_densenet_seg(input_shape, options.drop_prob)
+        model = make_densenet_seg(
+            input_shape, nb_labels, drop_prob=options.drop_prob)
     else:
         raise ValueError('{} is not a valid model_type'.format(model_type))
 

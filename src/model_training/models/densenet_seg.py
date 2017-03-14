@@ -8,6 +8,7 @@ from keras.layers import (
     Input, merge, Convolution2D, MaxPooling2D, UpSampling2D, Activation,
     Reshape, BatchNormalization, Dropout)
 from keras.regularizers import l2
+from keras.backend import shape
 
 
 def make_conv_layer(input_tensor, block_idx, layer_idx, growth_rate=16,
@@ -35,12 +36,14 @@ def make_dense_block(input_tensor, block_idx, nb_layers, growth_rate=16,
         x = merge([x, layer_output], mode='concat')
         layer_outputs.append(layer_output)
 
-    block_output = merge(layers_outputs, mode='concat')
-    return block_output
+    block_output = merge(layer_outputs, mode='concat')
+    block_size = nb_layers * growth_rate
+
+    return block_output, block_size
 
 
-def make_trans_down(input_tensor, block_idx, drop_prob=0.2, weight_decay=1e-4):
-    nb_filters = input_tensor.output_shape()[3]
+def make_trans_down(input_tensor, nb_filters, block_idx, drop_prob=0.2,
+                    weight_decay=1e-4):
     name = 'batch_norm_trans_down_{}'.format(block_idx)
     x = BatchNormalization(name=name)(input_tensor)
     x = Activation('relu')(x)
@@ -54,8 +57,7 @@ def make_trans_down(input_tensor, block_idx, drop_prob=0.2, weight_decay=1e-4):
     return x
 
 
-def make_trans_up(input_tensor, block_idx, weight_decay=1e-4):
-    nb_filters = input_tensor.output_shape()[3]
+def make_trans_up(input_tensor, nb_filters, block_idx, weight_decay=1e-4):
     x = UpSampling2D(size=(2, 2))(input_tensor)
     name = 'conv_trans_up_{}'.format(block_idx)
     x = Convolution2D(nb_filters, 3, 3, name=name, init='he_uniform',
@@ -65,7 +67,7 @@ def make_trans_up(input_tensor, block_idx, weight_decay=1e-4):
     return x
 
 
-def make_densenet_seg(input_shape, growth_rate=16,
+def make_densenet_seg(input_shape, nb_labels, growth_rate=16,
                       drop_prob=0.2, weight_decay=1e-4,
                       down_blocks=[4, 5, 7, 10, 12, 15],
                       up_blocks=[12, 10, 7, 5, 4]):
@@ -74,27 +76,37 @@ def make_densenet_seg(input_shape, growth_rate=16,
     name = 'conv_initial'
     nb_rows, nb_cols, nb_channels = input_shape
     nb_filters = nb_channels * growth_rate
+
+    input_tensor = Input(input_shape)
     x = Convolution2D(nb_filters, 3, 3, name=name, init='he_uniform',
                       border_mode='same', bias=False,
                       W_regularizer=l2(weight_decay))(input_tensor)
 
+    x_size = nb_filters
+
     for block_idx, nb_layers in enumerate(down_blocks):
-        block_output = make_dense_block(x, block_idx, nb_layers, growth_rate,
-                                        drop_prob, weight_decay)
-        if block_idx < nb_layers - 1:
+        block_output, block_size = make_dense_block(
+            x, block_idx, nb_layers, growth_rate, drop_prob, weight_decay)
+
+        if block_idx < len(down_blocks) - 1:
             x = merge([x, block_output], mode='concat')
-            x = make_trans_down(x, block_idx, drop_prob, weight_decay)
+            x_size += block_size
             skips.append(x)
+
+            x = make_trans_down(x, x_size, block_idx, drop_prob, weight_decay)
         else:
             x = block_output
+            x_size = block_size
 
     for nb_layers, skip in zip(up_blocks, reversed(skips)):
         block_idx += 1
 
-        x = make_trans_up(x, block_idx)
+        x = make_trans_up(x, x_size, block_idx, weight_decay)
+
         x = merge([x, skip], mode='concat')
-        x = make_dense_block(x, block_idx, nb_layers, growth_rate, drop_prob,
-                             weight_decay)
+        x, block_size = make_dense_block(
+            x, block_idx, nb_layers, growth_rate, drop_prob, weight_decay)
+        x_size = block_size
 
     name = 'conv_final'
     x = Convolution2D(nb_labels, 1, 1, name=name, init='he_uniform',
