@@ -1,0 +1,16 @@
+{
+    "batch_size": 2,
+    "git_commit": null,
+    "dataset": "potsdam",
+    "sharah_train_ratio": true,
+    "drop_prob": 0.2,
+    "patience": 10,
+    "include_depth": true,
+    "include_ir": true,
+    "include_ndvi": false,
+    "model_type": "densenet_seg",
+    "nb_epoch": 50,
+    "nb_val_samples": 512,
+    "run_name": "3_14_17/densenet",
+    "samples_per_epoch": 4096
+}

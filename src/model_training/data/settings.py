@@ -41,7 +41,7 @@ class PotsdamInfo():
         self.dataset_path = join(datasets_path, 'processed_potsdam')
         self.raw_dataset_path = join(datasets_path, POTSDAM)
         self.small_tile_size = 256
-        self.big_tile_size = 2000
+        self.big_tile_size = 1024
         self.nb_labels = len(label_keys)
 
         # The first 17 indices correspond to the training set,

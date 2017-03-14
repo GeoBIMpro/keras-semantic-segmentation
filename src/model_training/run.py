@@ -53,7 +53,8 @@ class RunOptions():
             self.drop_prob = options['drop_prob']
 
         # dataset dependent options
-        if self.dataset == POTSDAM and 'sharah_train_ratio' in options:
+        if (self.dataset == POTSDAM and 'sharah_train_ratio' in options and
+                options['sharah_train_ratio']):
             dataset_info = get_dataset_info(POTSDAM)
             self.train_ratio = dataset_info.sharah_train_ratio
         else:
