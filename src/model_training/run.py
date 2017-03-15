@@ -34,6 +34,8 @@ class RunOptions():
         self.nb_epoch = options['nb_epoch']
         self.samples_per_epoch = options['samples_per_epoch']
         self.nb_val_samples = options['nb_val_samples']
+        self.optimizer = options['optimizer']
+        self.init_lr = options['init_lr']
 
         self.git_commit = options['git_commit']
 

@@ -70,7 +70,7 @@ def make_trans_up(input_tensor, nb_filters, block_idx, weight_decay=1e-4):
                       W_regularizer=W_regularizer)(x)
 
     return x
-    
+
 
 def make_fc_densenet(input_shape, nb_labels, growth_rate=16,
                      drop_prob=0.2, weight_decay=1e-4,

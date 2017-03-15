@@ -6,7 +6,7 @@ from os.path import join, isfile
 from keras.callbacks import (ModelCheckpoint, CSVLogger,
                              ReduceLROnPlateau, LambdaCallback,
                              LearningRateScheduler)
-from keras.optimizers import Adam
+from keras.optimizers import Adam, RMSprop
 
 from .data.generators import make_split_generator
 from .data.settings import results_path, TRAIN, VALIDATION
@@ -21,6 +21,9 @@ FCN_VGG = 'fcn_vgg'
 FCN_RESNET = 'fcn_resnet'
 UNET = 'unet'
 FC_DENSENET = 'fc_densenet'
+
+ADAM = 'adam'
+RMS_PROP = 'rms_prop'
 
 def make_model(options, dataset_info):
     """ A factory for generating models from options """
@@ -61,9 +64,14 @@ def train_model(model, sync_results, options, dataset_info):
         batch_size=options.batch_size, shuffle=True,
         scale=True, augment=True)
 
+    if options.optimizer == ADAM:
+        optimizer = Adam(options.init_lr)
+    elif options.optimizer == RMS_PROP:
+        optimizer = RMSprop(options.init_lr)
+
     model.compile(
         loss='categorical_crossentropy',
-        optimizer=Adam(0.001),
+        optimizer=optimizer,
         metrics=['accuracy'])
 
     run_path = join(results_path, options.run_name)
