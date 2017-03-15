@@ -14,13 +14,13 @@ from .models.conv_logistic import make_conv_logistic
 from .models.fcn_vgg import make_fcn_vgg
 from .models.fcn_resnet import make_fcn_resnet
 from .models.unet import make_unet
-from .models.densenet_seg import make_densenet_seg
+from .models.fc_densenet import make_fc_densenet
 
 CONV_LOGISTIC = 'conv_logistic'
 FCN_VGG = 'fcn_vgg'
 FCN_RESNET = 'fcn_resnet'
 UNET = 'unet'
-DENSENET_SEG = 'densenet_seg'
+FC_DENSENET = 'fc_densenet'
 
 def make_model(options, dataset_info):
     """ A factory for generating models from options """
@@ -38,9 +38,12 @@ def make_model(options, dataset_info):
                                 options.drop_prob, options.is_big_model)
     elif model_type == UNET:
         model = make_unet(input_shape, nb_labels)
-    elif model_type == DENSENET_SEG:
-        model = make_densenet_seg(
-            input_shape, nb_labels, drop_prob=options.drop_prob)
+    elif model_type == FC_DENSENET:
+        model = make_fc_densenet(
+            input_shape, nb_labels, drop_prob=options.drop_prob,
+            weight_decay=options.weight_decay,
+            down_blocks=options.down_blocks,
+            up_blocks=options.up_blocks)
     else:
         raise ValueError('{} is not a valid model_type'.format(model_type))
 
@@ -53,12 +56,9 @@ def train_model(model, sync_results, options, dataset_info):
     train_gen = make_split_generator(
         dataset_info, TRAIN,
         batch_size=options.batch_size, shuffle=True, augment=True, scale=True)
-    # Use the same validation set for each epoch using shuffle and
-    # reset_interval.
     validation_gen = make_split_generator(
         dataset_info, VALIDATION,
-        batch_size=options.batch_size, shuffle=False,
-        reset_interval=options.nb_val_samples,
+        batch_size=options.batch_size, shuffle=True,
         scale=True, augment=True)
 
     model.compile(

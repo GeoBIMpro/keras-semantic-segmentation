@@ -11,7 +11,7 @@ from subprocess import call
 from .data.preprocess import _makedirs
 from .data.settings import results_path, get_dataset_info, POTSDAM
 from .train import (
-    make_model, train_model, CONV_LOGISTIC, FCN_RESNET, DENSENET_SEG)
+    make_model, train_model, CONV_LOGISTIC, FCN_RESNET, FC_DENSENET)
 from .eval_run import eval_run
 
 SETUP = 'setup'
@@ -49,8 +49,12 @@ class RunOptions():
         elif self.model_type == FCN_RESNET:
             self.drop_prob = options['drop_prob']
             self.is_big_model = options['is_big_model']
-        elif self.model_type == DENSENET_SEG:
+        elif self.model_type == FC_DENSENET:
+            self.growth_rate = options['growth_rate']
             self.drop_prob = options['drop_prob']
+            self.weight_decay = options['weight_decay']
+            self.down_blocks = options['down_blocks']
+            self.up_blocks = options['up_blocks']
 
         # dataset dependent options
         if (self.dataset == POTSDAM and 'sharah_train_ratio' in options and
