@@ -11,14 +11,14 @@ from keras.regularizers import l2
 from keras.backend import shape
 
 
-def make_conv_layer(input_tensor, block_idx, layer_idx, growth_rate=16,
+def make_conv_layer(input_tensor, block_idx, layer_idx, nb_filters=16,
                     drop_prob=0.2, weight_decay=1e-4):
     name = 'batch_norm_{}_{}'.format(block_idx, layer_idx)
     x = BatchNormalization(name=name)(input_tensor)
     x = Activation('relu')(x)
     name = 'conv_{}_{}'.format(block_idx, layer_idx)
     W_regularizer = l2(weight_decay) if weight_decay is not None else None
-    x = Convolution2D(growth_rate, 3, 3, name=name, init='he_uniform',
+    x = Convolution2D(nb_filters, 3, 3, name=name, init='he_uniform',
                       border_mode='same', bias=False,
                       W_regularizer=W_regularizer)(x)
     if drop_prob is not None:
