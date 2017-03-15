@@ -125,5 +125,5 @@ def make_fc_densenet(input_shape, nb_labels, growth_rate=16,
     x = Reshape((nb_rows, nb_cols, nb_labels))(x)
 
     model = Model(input=input_tensor, output=x)
-
+    print('layers: {}'.format(len(model.layers)))
     return model
