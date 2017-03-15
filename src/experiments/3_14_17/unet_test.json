@@ -1,0 +1,17 @@
+{
+    "batch_size": 3,
+    "git_commit": null,
+    "dataset": "potsdam",
+    "optimizer": "adam",
+    "init_lr": 1e-3,
+    "sharah_train_ratio": true,
+    "patience": 10,
+    "include_depth": true,
+    "include_ir": true,
+    "include_ndvi": false,
+    "model_type": "unet",
+    "nb_epoch": 50,
+    "nb_val_samples": 512,
+    "run_name": "3_14_17/unet_test",
+    "samples_per_epoch": 4096
+}
